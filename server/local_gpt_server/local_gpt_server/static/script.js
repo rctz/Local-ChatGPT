@@ -1,6 +1,6 @@
 async function requestServer(msg) {
     const csrftoken = getCookie('csrftoken');
-    const response = await fetch("http://127.0.0.1:8000/api/chat", {
+    const response = await fetch("http://127.0.0.1:8000/api/chat_stream", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -11,10 +11,12 @@ async function requestServer(msg) {
              message: msg 
             }),
     });
-    const response_json = await response.json();
-    console.log(response_json);
-    return response_json;
+    const response_text = response.text();
+    console.log(response_text);
+    return response_text;
   }
+
+
 
 document.addEventListener('DOMContentLoaded', function () {
     const messageInput = document.getElementById('message-input');
@@ -26,28 +28,37 @@ document.addEventListener('DOMContentLoaded', function () {
         const message = messageInput.value.trim();
         if (message !== '') {
             handleServerResponse(message)
-            displayMessage('You', message);
+            displayUserMessage('You', message);
             messageInput.value = '';
         }
     });
 
     async function handleServerResponse(message) {
         let response = await requestServer(message);
-        response = JSON.parse(response);
-        displayMessage('LocalGPT', response.message);
+        displayGPTMessage('LocalGPT', response);
     }
 
-    function displayMessage(sender, text) {
+    function displayGPTMessage(sender, text) {
         const messageDiv = document.createElement('div');
-        messageDiv.classList.add('message');
-        messageDiv.innerHTML = `<strong>${sender}:</strong> ${text}`;
+        messageDiv.classList.add('gpt-chat-messages');
+        messageDiv.innerHTML = `<strong>${sender}: </strong> ${' ' + text}`;
         chatMessages.appendChild(messageDiv);
         chatMessages.scrollTop = chatMessages.scrollHeight;
     }
 
+    function displayUserMessage(sender, text) {
+        const messageDiv = document.createElement('div');
+        messageDiv.classList.add('user-messages');
+        messageDiv.innerHTML = `<strong>${sender}: </strong> ${' ' + text}`;
+        chatMessages.appendChild(messageDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    
+
     // Simulate receiving a message (for demonstration purposes)
     setTimeout(function () {
-        displayMessage('LocalGPT', 'Hello! How are you?');
+        displayGPTMessage('LocalGPT', 'Hello! How are you?');
     }, 1000);
 });
 

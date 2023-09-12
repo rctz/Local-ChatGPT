@@ -28,5 +28,6 @@ urlpatterns = [
 
 
     path('api/chat', chat.chat_response, name='chat_reponse'),
+    path('api/chat_stream', chat.chat_stream_response, name='chat_stream_reponse'),
 ] 
 urlpatterns += staticfiles_urlpatterns()
