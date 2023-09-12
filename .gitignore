@@ -1,2 +1,4 @@
 env/
 .prettierrc
+__pycache__/
+server/local_gpt_server/static/
