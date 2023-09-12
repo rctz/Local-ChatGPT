@@ -20,11 +20,13 @@ from . import views
 from django.conf.urls.static import static
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.conf import settings
+from .src import chat
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('text_response/', views.text_response, name='text_response'),
     path('chat/', views.chat_view, name='chat_view'),
-    
+
+
+    path('api/chat', chat.chat_response, name='chat_reponse'),
 ] 
 urlpatterns += staticfiles_urlpatterns()
