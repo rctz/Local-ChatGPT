@@ -1,5 +1,5 @@
 # LocalChatGPT 
-Local chat bot base on pre-trained models for using with confidential information.
+Local chat bot base on pre-trained models for using with local confidential information.
 
 
 ### Requirement
