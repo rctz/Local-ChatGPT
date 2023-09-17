@@ -2,8 +2,8 @@ from gpt4all import GPT4All
 from django.http import HttpResponse, JsonResponse, StreamingHttpResponse
 import json
 #model = GPT4All("wizardlm-13b-v1.1-superhot-8k.ggmlv3.q4_0.bin")
-#model = GPT4All(model_name='orca-mini-3b.ggmlv3.q4_0.bin')
-model = GPT4All(model_name='orca-mini-13b.ggmlv3.q4_0.bin')
+model = GPT4All(model_name='orca-mini-3b.ggmlv3.q4_0.bin')
+#model = GPT4All(model_name='orca-mini-13b.ggmlv3.q4_0.bin')
 
 
 def chat_generate(prompt, max_tokens=600, temp=0.5, stream=False):
@@ -21,10 +21,5 @@ def chat_response(request):
 
 def chat_stream_response(request):
     message = json.loads(request.body)['message']
-    print(message)
     response = chat_generate(message, max_tokens=100, temp=0.5, stream=True)
-    # responseJson = {
-    #     "message": response,
-    # }
-    #responseJson = json.dumps(responseJson)
     return StreamingHttpResponse(response)
