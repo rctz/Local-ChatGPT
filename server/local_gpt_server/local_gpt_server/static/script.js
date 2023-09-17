@@ -63,6 +63,13 @@ function displayUserMessage(sender, text) {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
+    messageInput.addEventListener('keydown', function (event) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            sendButton.click();
+        }
+    });
+
     sendButton.addEventListener('click', async function () {
         console.log('send button clicked');
         const message = messageInput.value.trim();
