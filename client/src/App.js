@@ -1,25 +1,21 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from "react";
+import ChatButton from "./component/chat_button";
+import ChatMessageBox from "./component/chat_box";
 
-function App() {
+function ChatApp() {
+  const [messages, setMessages] = useState([]);
+
+  // Function to add a message to the state
+  const showMessage = (message) => {
+    setMessages([...messages, message]);
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="chat-container">
+      <ChatMessageBox messages={messages} />
+      <ChatButton showMessage={showMessage} />
     </div>
   );
 }
 
-export default App;
+export default ChatApp;
