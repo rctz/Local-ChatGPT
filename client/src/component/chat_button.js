@@ -1,6 +1,7 @@
 // ChatButton.js
 import React, { useState, useEffect } from "react";
 import "../css/SendButton.css";
+import Message from "../component/message.js";
 
 const GPT_NAME = "LocalGPT";
 
@@ -41,23 +42,25 @@ const ChatButton = ({}) => {
       });
 
       const reader = response.body.getReader();
-      let text = GPT_NAME + ": ";
+
+      let text = "";
       while (true) {
         const { done, value } = await reader.read();
         if (done) {
           break;
         }
+
         text = new TextDecoder().decode(value);
 
         setMessages((prevMessages) => {
           const lastMessage = prevMessages[prevMessages.length - 1];
-          if (lastMessage && lastMessage.sender === "bot") {
+          if (lastMessage && lastMessage.sender === GPT_NAME) {
             return [
               ...prevMessages.slice(0, -1),
-              { text: lastMessage.text + text, sender: "bot" },
+              { text: lastMessage.text + text, sender: GPT_NAME },
             ];
           } else {
-            return [...prevMessages, { text, sender: "bot" }];
+            return [...prevMessages, { text, sender: GPT_NAME }];
           }
         });
       }
@@ -75,7 +78,7 @@ const ChatButton = ({}) => {
     if (message !== "") {
       setMessages((prevMessages) => [
         ...prevMessages,
-        { text: message, sender: "user" },
+        { text: message, sender: "User" },
       ]);
       handleServerResponse(message);
       setInputMessage("");
@@ -90,9 +93,12 @@ const ChatButton = ({}) => {
     <div className="chat-container">
       <div className="chat-section">
         {messages.map((message, index) => (
-          <div key={index} className={`message ${message.sender}`}>
-            {message.text}
-          </div>
+          <Message
+            key={index}
+            className={`message ${message.sender}`}
+            message={message.text}
+            sender={message.sender}
+          />
         ))}
       </div>
       <div className="chat-input">

@@ -3,7 +3,7 @@ import "../css/Message.css";
 
 function Message({ message, sender }) {
   return (
-    <div className={sender === "user" ? "user-message" : "gpt-message"}>
+    <div className={sender === "User" ? "user-message" : "gpt-message"}>
       <span className="message-sender">{sender}: </span>
       {message}
     </div>
