@@ -1,0 +1,17 @@
+.user-message {
+  background-color: #e2e2e2;
+  border-radius: 10px;
+  padding: 10px;
+  margin: 5px 0;
+  max-width: 70%;
+  word-wrap: break-word;
+}
+
+.gpt-message {
+  background-color: #e2e2e2;
+  border-radius: 10px;
+  padding: 10px;
+  margin: 5px 0;
+  max-width: 70%;
+  word-wrap: break-word;
+}

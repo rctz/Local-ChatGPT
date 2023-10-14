@@ -49,7 +49,7 @@ const ChatButton = ({ showMessage }) => {
         }
         text += new TextDecoder().decode(value);
         showMessage(text);
-        //showMessage((prevMessages) => [...prevMessages, text]);
+        //showMessage((prevMessages) => prevMessages + text);
       }
     } catch (error) {
       console.log(error);
@@ -71,7 +71,7 @@ const ChatButton = ({ showMessage }) => {
 
   const displayUserMessage = (sender, text) => {
     const message = `${sender}: ${text}`;
-    showMessage(message);
+    showMessage(message, "user");
     //messages((prevMessages) => [...prevMessages, message]);
   };
 
@@ -79,13 +79,10 @@ const ChatButton = ({ showMessage }) => {
     await gptResponse(message);
   };
 
-  // Simulate receiving a message (for demonstration purposes)
-  useEffect(() => {
-    setTimeout(() => {
-      const message = `${GPT_NAME}: Hello! How are you?`;
-      showMessage(message);
-    }, 1000);
-  }, []);
+  // setTimeout(() => {
+  //   const message = `${GPT_NAME}: Hello! How are you?`;
+  //   showMessage(message);
+  // }, 1000);
 
   return (
     <div className="chat-input">
