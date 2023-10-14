@@ -14,12 +14,10 @@ function ChatApp() {
   };
 
   return (
-    <StreamProvider>
-      <div className="chat-container">
-        <ChatMessageBox messages={messages} />
-        <ChatButton showMessage={showMessage} />
-      </div>
-    </StreamProvider>
+    <div className="chat-container">
+      <ChatMessageBox messages={messages} />
+      <ChatButton showMessage={showMessage} />
+    </div>
   );
 }
 

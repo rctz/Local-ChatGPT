@@ -20,8 +20,8 @@ function getCookie(name) {
   return cookieValue;
 }
 
-const ChatButton = ({ showMessage }) => {
-  //const [messages, setMessages] = useState([]);
+const ChatButton = ({}) => {
+  const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState("");
 
   const gptResponse = async (msg) => {
@@ -47,9 +47,19 @@ const ChatButton = ({ showMessage }) => {
         if (done) {
           break;
         }
-        text += new TextDecoder().decode(value);
-        showMessage(text);
-        //showMessage((prevMessages) => prevMessages + text);
+        text = new TextDecoder().decode(value);
+
+        setMessages((prevMessages) => {
+          const lastMessage = prevMessages[prevMessages.length - 1];
+          if (lastMessage && lastMessage.sender === "bot") {
+            return [
+              ...prevMessages.slice(0, -1),
+              { text: lastMessage.text + text, sender: "bot" },
+            ];
+          } else {
+            return [...prevMessages, { text, sender: "bot" }];
+          }
+        });
       }
     } catch (error) {
       console.log(error);
@@ -63,43 +73,44 @@ const ChatButton = ({ showMessage }) => {
   const handleSendMessage = () => {
     const message = inputMessage.trim();
     if (message !== "") {
-      displayUserMessage("You", message);
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        { text: message, sender: "user" },
+      ]);
       handleServerResponse(message);
       setInputMessage("");
     }
-  };
-
-  const displayUserMessage = (sender, text) => {
-    const message = `${sender}: ${text}`;
-    showMessage(message, "user");
-    //messages((prevMessages) => [...prevMessages, message]);
   };
 
   const handleServerResponse = async (message) => {
     await gptResponse(message);
   };
 
-  // setTimeout(() => {
-  //   const message = `${GPT_NAME}: Hello! How are you?`;
-  //   showMessage(message);
-  // }, 1000);
-
   return (
-    <div className="chat-input">
-      <input
-        type="text"
-        id="message-input"
-        placeholder="Type a message..."
-        value={inputMessage}
-        onChange={handleInputMessageChange}
-      />
-      <button
-        id="send-button"
-        className="send-button"
-        onClick={handleSendMessage}
-      >
-        Send
-      </button>
+    <div className="chat-container">
+      <div className="chat-section">
+        {messages.map((message, index) => (
+          <div key={index} className={`message ${message.sender}`}>
+            {message.text}
+          </div>
+        ))}
+      </div>
+      <div className="chat-input">
+        <input
+          type="text"
+          id="message-input"
+          placeholder="Type a message..."
+          value={inputMessage}
+          onChange={handleInputMessageChange}
+        />
+        <button
+          id="send-button"
+          className="send-button"
+          onClick={handleSendMessage}
+        >
+          Send
+        </button>
+      </div>
     </div>
   );
 };
