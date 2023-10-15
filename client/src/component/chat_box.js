@@ -4,31 +4,43 @@ import { useStream } from "./stream_context";
 
 function ChatMessageBox({ messages }) {
   // Filter messages based on sender
-  const userMessages = messages.filter((message) => message.sender === "user");
-  const botMessages = messages.filter((message) => message.sender === "gpt");
 
-  return (
-    <div className="message-box">
-      <div className="user-messages">
-        {userMessages.map((message, index) => (
+  const nestedMessages = messages.reduce((acc, message) => {
+    const messageText = message.text.trim();
+    if (messageText.startsWith("```")) {
+      const nestedMessageText = messageText.slice(3, -3).trim();
+      console.log(nestedMessageText);
+      acc.push(
+        <Message
+          key={acc.length}
+          className={`message ${message.sender}`}
+          message={message.text
+            .replace(`'''${nestedMessageText}'''`, "")
+            .trim()}
+          sender={message.sender}
+        >
           <Message
-            key={index}
-            message={message.message}
+            key={acc.length + 1}
+            className={`message_code ${message.sender}`}
+            message={nestedMessageText}
             sender={message.sender}
           />
-        ))}
-      </div>
-      <div className="gpt-messages">
-        {botMessages.map((message, index) => (
-          <Message
-            key={index}
-            message={message.message}
-            sender={message.sender}
-          />
-        ))}
-      </div>
-    </div>
-  );
+        </Message>
+      );
+    } else {
+      acc.push(
+        <Message
+          key={acc.length}
+          className={`message ${message.sender}`}
+          message={message.text}
+          sender={message.sender}
+        />
+      );
+    }
+    return acc;
+  }, []);
+
+  return <div className="chat-section">{nestedMessages}</div>;
 }
 
 export default ChatMessageBox;

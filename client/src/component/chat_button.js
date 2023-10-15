@@ -21,13 +21,12 @@ function getCookie(name) {
   return cookieValue;
 }
 
-const ChatButton = ({}) => {
+const ChatButton = ({ showMessage }) => {
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState("");
 
   const gptResponse = async (msg) => {
     const csrfToken = getCookie("csrftoken");
-    console.log(csrfToken);
     try {
       const response = await fetch("http://127.0.0.1:8000/api/chat_stream", {
         method: "POST",
@@ -51,18 +50,7 @@ const ChatButton = ({}) => {
         }
 
         text = new TextDecoder().decode(value);
-
-        setMessages((prevMessages) => {
-          const lastMessage = prevMessages[prevMessages.length - 1];
-          if (lastMessage && lastMessage.sender === GPT_NAME) {
-            return [
-              ...prevMessages.slice(0, -1),
-              { text: lastMessage.text + text, sender: GPT_NAME },
-            ];
-          } else {
-            return [...prevMessages, { text, sender: GPT_NAME }];
-          }
-        });
+        showMessage(text, GPT_NAME);
       }
     } catch (error) {
       console.log(error);
@@ -76,10 +64,11 @@ const ChatButton = ({}) => {
   const handleSendMessage = () => {
     const message = inputMessage.trim();
     if (message !== "") {
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        { text: message, sender: "User" },
-      ]);
+      showMessage(message, "User");
+      // setMessages((prevMessages) => [
+      //   ...prevMessages,
+      //   { text: message, sender: "User" },
+      // ]);
       handleServerResponse(message);
       setInputMessage("");
     }
@@ -90,33 +79,21 @@ const ChatButton = ({}) => {
   };
 
   return (
-    <div className="chat-container">
-      <div className="chat-section">
-        {messages.map((message, index) => (
-          <Message
-            key={index}
-            className={`message ${message.sender}`}
-            message={message.text}
-            sender={message.sender}
-          />
-        ))}
-      </div>
-      <div className="chat-input">
-        <input
-          type="text"
-          id="message-input"
-          placeholder="Type a message..."
-          value={inputMessage}
-          onChange={handleInputMessageChange}
-        />
-        <button
-          id="send-button"
-          className="send-button"
-          onClick={handleSendMessage}
-        >
-          Send
-        </button>
-      </div>
+    <div className="chat-input">
+      <input
+        type="text"
+        id="message-input"
+        placeholder="Type a message..."
+        value={inputMessage}
+        onChange={handleInputMessageChange}
+      />
+      <button
+        id="send-button"
+        className="send-button"
+        onClick={handleSendMessage}
+      >
+        Send
+      </button>
     </div>
   );
 };
