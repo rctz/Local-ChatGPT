@@ -1,0 +1,43 @@
+.chat-app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.chat-box {
+  flex-grow: 1;
+  overflow-y: scroll;
+}
+
+.message {
+  padding: 8px;
+  margin: 8px;
+  border: 1px solid #ccc;
+}
+
+.message.user {
+  background-color: #e6f7ff;
+}
+
+.message.bot {
+  background-color: #f0f0f0;
+}
+
+.message-input {
+  display: flex;
+  margin-top: 8px;
+}
+
+input {
+  flex-grow: 1;
+  padding: 4px;
+}
+
+button {
+  padding: 4px 8px;
+  margin-left: 8px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
