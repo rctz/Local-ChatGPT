@@ -1,8 +1,8 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
-import "./beautiful.css";
-import ChatApp from "./chat_app";
+import "./css/chat.css";
+import ChatApp from "./components/chat_app";
 import reportWebVitals from "./reportWebVitals";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
