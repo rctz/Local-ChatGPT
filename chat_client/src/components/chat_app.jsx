@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import ChatBox from "./chat_box";
 import MessageInput from "./message_input";
+import ThemeSwitcher from "./theme_switcher";
 
 const GPT_NAME = "LocalGPT";
 const USER_NAME = "User";
@@ -23,6 +24,7 @@ function getCookie(name) {
 function ChatApp() {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
+  const [theme, setTheme] = useState("light"); // Add theme state
 
   const showMessage = (message, sender) => {
     setMessages((prevMessages) => {
@@ -76,14 +78,34 @@ function ChatApp() {
     }
   };
 
+  const handleThemeChange = (selectedTheme) => {
+    setTheme(selectedTheme);
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault(); // Prevent line break
+      handleSend(); // Trigger the send message function
+    }
+  };
+
   return (
-    <div className="chat-app">
-      <ChatBox messages={messages} />
-      <MessageInput
-        value={newMessage}
-        onChange={(e) => setNewMessage(e.target.value)}
-        onSend={handleSend}
-      />
+    <div
+      className={`main-app ${theme === "dark" ? "dark-theme" : "light-theme"}`}
+    >
+      <ThemeSwitcher onThemeChange={handleThemeChange} />
+      <div className="chat-app">
+        <ChatBox
+          messages={messages}
+          theme={theme === "dark" ? "dark-theme" : "light-theme"}
+        />
+        <MessageInput
+          value={newMessage}
+          onChange={(e) => setNewMessage(e.target.value)}
+          onSend={handleSend}
+          onKeyPress={handleKeyPress}
+        />
+      </div>
     </div>
   );
 }
