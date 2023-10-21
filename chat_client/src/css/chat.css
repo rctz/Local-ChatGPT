@@ -3,10 +3,9 @@
   justify-content: center; /* Horizontally center */
   align-items: center; /* Vertically center */
   height: 100vh; /* Adjust as needed */
-  border: 2px solid #ccc; /* Add a border */
-  border-radius: 10px; /* Rounded corners */
-  padding: 20px; /* Add padding to the outer container */
+  /* padding: 20px; Add padding to the outer container */
   background-color: #f9f9f9; /* Background color for the outer container */
+  min-width: 400px;
 }
 
 /* Style for the inner container */
@@ -15,7 +14,7 @@
   width: 80%; /* Adjust the width as needed */
   border: 1px solid #ccc; /* Add a border to the inner container */
   border-radius: 5px; /* Rounded corners for the inner container */
-  padding: 20px; /* Add padding to the inner container */
+  padding: 10px; /* Add padding to the inner container */
   display: flex;
   flex-direction: column; /* Align items in a column */
   justify-content: space-between; /* Place items at the start and end */
@@ -96,10 +95,11 @@ button {
 
 /* Styles for the ThemeSwitcher component (if needed) */
 .theme-switcher {
-  display: flex;
+  display: inline-flex;
   position: absolute;
-  top: 20px; /* Adjust the top distance as needed */
-  right: 25px; /* Adjust the right distance as needed */
+  top: 2%; /* Adjust the top distance as needed */
+  right: 5%;
+  /* right: 25px; Adjust the right distance as needed */
 }
 
 /* .theme-switcher button {

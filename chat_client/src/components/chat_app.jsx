@@ -45,36 +45,36 @@ function ChatApp() {
     if (newMessage) {
       setMessages([...messages, { text: newMessage, sender: USER_NAME }]);
       setNewMessage("");
-    }
 
-    const csrfToken = getCookie("csrftoken");
-    try {
-      const response = await fetch("/api/chat_stream", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json, text/plain, */*",
-          "X-CSRFToken": csrfToken,
-        },
-        body: JSON.stringify({
-          message: newMessage,
-        }),
-      });
+      const csrfToken = getCookie("csrftoken");
+      try {
+        const response = await fetch("/api/chat_stream", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json, text/plain, */*",
+            "X-CSRFToken": csrfToken,
+          },
+          body: JSON.stringify({
+            message: newMessage,
+          }),
+        });
 
-      const reader = response.body.getReader();
+        const reader = response.body.getReader();
 
-      let text = "";
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) {
-          break;
+        let text = "";
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) {
+            break;
+          }
+
+          text = new TextDecoder().decode(value);
+          showMessage(text, GPT_NAME);
         }
-
-        text = new TextDecoder().decode(value);
-        showMessage(text, GPT_NAME);
+      } catch (error) {
+        console.log(error);
       }
-    } catch (error) {
-      console.log(error);
     }
   };
 

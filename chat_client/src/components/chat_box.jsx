@@ -5,6 +5,7 @@ function ChatBox({ messages, theme }) {
   const [autoScroll, setAutoScroll] = useState(true);
 
   useEffect(() => {
+    console.log(autoScroll);
     if (autoScroll) {
       // Scroll to the bottom of the chat box when new messages are added
       chatBoxRef.current.scrollTop = chatBoxRef.current.scrollHeight;
@@ -13,11 +14,19 @@ function ChatBox({ messages, theme }) {
 
   const handleScroll = () => {
     const { scrollHeight, scrollTop, clientHeight } = chatBoxRef.current;
-    console.log(scrollHeight, scrollTop, clientHeight);
+    console.log(scrollHeight - scrollTop);
+    console.log(clientHeight);
     // Check if the user has scrolled to the bottom
-    if (scrollHeight - scrollTop === clientHeight) {
+    const total_scroll = scrollHeight - scrollTop;
+    const scroll_height = total_scroll - clientHeight;
+    if (
+      total_scroll <= clientHeight ||
+      (0 < scroll_height && scroll_height < 1)
+    ) {
+      console.log("Auto scroll");
       setAutoScroll(true);
     } else {
+      console.log("Not Auto scroll");
       setAutoScroll(false);
     }
   };
