@@ -109,12 +109,15 @@ CACHES = {
 }
 
 # Session settings
-SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
+SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 
 CSRF_USE_SESSIONS = True
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SECURE = False
 SESSION_COOKIE_SAMESITE = None
+
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+SESSION_COOKIE_AGE = 14 * 60 # Expire in 14 minutes
 
 
 WSGI_APPLICATION = 'local_gpt_server.wsgi.application'

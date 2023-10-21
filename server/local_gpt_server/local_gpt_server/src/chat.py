@@ -1,25 +1,29 @@
-from gpt4all import GPT4All
-from django.http import HttpResponse, JsonResponse, StreamingHttpResponse
+import gpt4all
+from django.http import StreamingHttpResponse
 import json
 from django.views.decorators.csrf import csrf_exempt
 import copy
+from django.core.cache import cache
 
 
 #model = GPT4All("wizardlm-13b-v1.1-superhot-8k.ggmlv3.q4_0.bin")
-model = GPT4All(model_name='orca-mini-3b.ggmlv3.q4_0.bin')
+model = gpt4all.GPT4All(model_name='orca-mini-3b.ggmlv3.q4_0.bin')
 #model = GPT4All(model_name='orca-mini-13b.ggmlv3.q4_0.bin')
 
 
 
 @csrf_exempt
 def chat_stream_response(request):
-    if "chat_history" in request.session:
-        chat_history = request.session['chat_history']
-        print(chat_history)
+    session_id = request.session.session_key
+    chat_history = None
+    if (session_id is None):
+        request.session.create()
+        session_id = request.session.session_key
     else:
-        chat_history = []
-        request.session['chat_history'] = chat_history
-        
+        chat_history = cache.get(session_id)
+
+    if (chat_history is None):
+        chat_history = [{"role": "system", "content": model.config["systemPrompt"]}]
         
     def generate_response(prompt, chat_history, max_tokens=600, temp=0.5, stream=False):
         with model.chat_session() as sesstion:
@@ -29,9 +33,8 @@ def chat_stream_response(request):
                 # Yield the response chunk to stream to the client
                 yield chunk
 
-            request.session['chat_history'] = copy.deepcopy(sesstion.current_chat_session)
-            print(request.session['chat_history'])
-
+            # Expire in 15minutes
+            cache.set(session_id, copy.deepcopy(sesstion.current_chat_session), 60*15)
 
     message = json.loads(request.body)['message']
     response = StreamingHttpResponse(generate_response(message, chat_history, max_tokens=200, temp=0.5, stream=True), content_type="application/octet-stream")
