@@ -49,7 +49,7 @@ function ChatApp() {
 
     const csrfToken = getCookie("csrftoken");
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/chat_stream", {
+      const response = await fetch("/api/chat_stream", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
