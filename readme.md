@@ -6,6 +6,8 @@ Local chat bot base on pre-trained models for using with local confidential data
 
 - Python 3.11+
 - Node.Js 20.5.1+
+- Redis lasted
+- Docker V4.22+
 
 ### Server Installation
 
@@ -47,3 +49,11 @@ Local chat bot base on pre-trained models for using with local confidential data
    npm start
    ```
 5. Let talk with GPT model by going to ** http://127.0.0.1:3000 **
+
+### Redis Installation
+
+1. Install [Docker](https://docs.docker.com/engine/install/)
+2. Change directory to docker
+   ```bash
+   docker compose up
+   ```
