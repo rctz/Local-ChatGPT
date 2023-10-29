@@ -117,3 +117,7 @@ button {
   justify-content: center;
   font-size: 15px; /* Adjust the font size */
 }
+
+.display-linebreak {
+  white-space: pre-line;
+}
