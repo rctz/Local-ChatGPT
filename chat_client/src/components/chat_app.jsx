@@ -3,6 +3,8 @@ import ChatBox from "./chat_box";
 import MessageInput from "./message_input";
 import ThemeSwitcher from "./theme_switcher";
 
+
+const GPT_NAME_TEMP = "LocalGPT_temp";
 const GPT_NAME = "LocalGPT";
 const USER_NAME = "User";
 
@@ -28,22 +30,87 @@ function ChatApp() {
 
   const showMessage = (message, sender) => {
     setMessages((prevMessages) => {
-      const lastMessage = prevMessages[prevMessages.length - 1];
-      if (lastMessage && lastMessage.sender === sender) {
+      
+      // For showing complete message with code section
+      // After complete prepare complete message, the temp stream message will be deleted
+      if (sender === GPT_NAME) {
+        let fragments = [];
+        let remainingText = message;
+        const codeRegex = /```(.*?)```/s;
+    
+        while (true) { 
+          const codeMatch = remainingText.match(codeRegex);
+          if (!codeMatch) break;
+  
+          const normalTextFragment = remainingText.substring(0, codeMatch.index).trim();
+          const codeTextFragment = codeMatch[1].trim();
+  
+          if (normalTextFragment) {
+            fragments.push({ type: 'text', lang:'en', content: normalTextFragment });
+          }
+          if (codeTextFragment) {
+            const lines = codeTextFragment.split('\n');
+            const language = lines[0]
+
+            lines.shift();
+            const remainingLines = lines.join('\n');
+            fragments.push({ type: 'code', lang:language, content: remainingLines });
+          }
+  
+          remainingText = remainingText.substring(codeMatch.index + codeMatch[0].length);
+        }
+
+        if (remainingText.trim()) {
+            fragments.push({ type: 'text', lang:'en', content: remainingText.trim() });
+        }
+        
+        const newMessage = { text: fragments, sender: sender };
         return [
           ...prevMessages.slice(0, -1),
-          { text: lastMessage.text + message, sender: sender },
+          newMessage
         ];
-      } else {
-        return [...prevMessages, { text: message, sender: sender }];
+
+
       }
+      else {
+        const lastMessage = prevMessages[prevMessages.length - 1];
+        // Deep clone of lastMessage to avoid modifying the original object directly
+        const clonedLastMessage = lastMessage ? JSON.parse(JSON.stringify(lastMessage)) : null;
+
+        // For showing temp stream message, in case of there is word in the message
+        if (clonedLastMessage && clonedLastMessage.sender === sender && Array.isArray(clonedLastMessage.text) && clonedLastMessage.text.length > 0) {
+            let lastText = clonedLastMessage.text[clonedLastMessage.text.length - 1];
+            if (lastText && typeof lastText.content === 'string') {
+                lastText.content += message;
+                return [
+                    ...prevMessages.slice(0, -1),
+                    clonedLastMessage
+                ];
+            }
+        } 
+        else {
+            const newFragment = { type: 'text', lang: 'en', content: message };
+            // For showing temp stream message, in case of no word in the message
+            if (clonedLastMessage && clonedLastMessage.sender === sender) {
+                // If the last message exists and is from the same sender, add to its text array
+                clonedLastMessage.text.push(newFragment);
+                return prevMessages;
+            } else {
+                // Otherwise, create a new 
+                return [...prevMessages, { text: [newFragment], sender: sender }];
+            }
+        }
+      }
+      
     });
   };
 
   const handleSend = async () => {
     // Set user message
     if (newMessage) {
-      setMessages([...messages, { text: newMessage, sender: USER_NAME }]);
+      
+      showMessage(newMessage, USER_NAME)
+      // setMessages([...messages, { text: newMessage, sender: USER_NAME }]);
       setNewMessage("");
 
       const csrfToken = getCookie("csrftoken");
@@ -61,16 +128,20 @@ function ChatApp() {
         });
 
         const reader = response.body.getReader();
-
+        
         let text = "";
+        let textAll = "";
         while (true) {
           const { done, value } = await reader.read();
+          text = new TextDecoder().decode(value);
+          textAll = textAll + text;
           if (done) {
+            // For showing complete message with code section
+            showMessage(textAll, GPT_NAME);
             break;
           }
-
-          text = new TextDecoder().decode(value);
-          showMessage(text, GPT_NAME);
+          // For showing temp stream message
+          showMessage(text, GPT_NAME_TEMP);
         }
       } catch (error) {
         console.log(error);
