@@ -43,7 +43,7 @@ def chat_stream_response(request):
 
     message = json.loads(request.body)["message"]
     response = StreamingHttpResponse(
-        generate_response(message, chat_history, max_tokens=200, temp=0.5, stream=True),
+        generate_response(message, chat_history, stream=True),
         content_type="application/octet-stream",
     )
 
