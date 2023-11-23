@@ -24,10 +24,7 @@ from .src import chat
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('chat/', views.chat_view, name='chat_view'),
-
-
-    path('api/chat', chat.chat_response, name='chat_reponse'),
+    
     path('api/chat_stream', chat.chat_stream_response, name='chat_stream_reponse'),
 ] 
 urlpatterns += staticfiles_urlpatterns()

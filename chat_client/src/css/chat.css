@@ -1,0 +1,123 @@
+.main-app {
+  display: flex;
+  justify-content: center; /* Horizontally center */
+  align-items: center; /* Vertically center */
+  height: 100vh; /* Adjust as needed */
+  /* padding: 20px; Add padding to the outer container */
+  background-color: #f9f9f9; /* Background color for the outer container */
+  min-width: 400px;
+}
+
+/* Style for the inner container */
+.chat-app {
+  height: 80%;
+  width: 80%; /* Adjust the width as needed */
+  border: 1px solid #ccc; /* Add a border to the inner container */
+  border-radius: 5px; /* Rounded corners for the inner container */
+  padding: 10px; /* Add padding to the inner container */
+  display: flex;
+  flex-direction: column; /* Align items in a column */
+  justify-content: space-between; /* Place items at the start and end */
+}
+
+.chat-box {
+  flex-grow: 1;
+  overflow-y: scroll;
+}
+
+.message {
+  padding: 8px;
+  margin: 8px;
+  border: 1px solid #ccc;
+}
+
+.message-sender {
+  font-weight: bold;
+}
+
+.message.user.light-theme {
+  background-color: #e6f7ff;
+  overflow-y: auto;
+}
+
+.message.bot.light-theme {
+  background-color: #f0f0f0;
+  overflow-y: auto;
+}
+
+.message.user.dark-theme {
+  background-color: #e6f7ff;
+  color: #c91616;
+  overflow-y: auto;
+}
+
+.message.bot.dark-theme {
+  background-color: #f0f0f0;
+  color: #c91616;
+  overflow-y: auto;
+}
+
+.message-input {
+  height: 30px;
+  font-size: 16px;
+  display: flex;
+  margin-top: 8px;
+  margin-bottom: 5px;
+  overflow-y: auto;
+  max-height: 100px;
+  min-height: 30px;
+}
+
+input {
+  flex-grow: 1;
+  padding: 4px;
+}
+
+button {
+  padding: 4px 8px;
+  margin-left: 8px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+
+/* Light theme styles */
+.light-theme {
+  background-color: #f9f9f9;
+}
+
+/* Dark theme styles */
+.dark-theme {
+  background-color: #333;
+  color: #fff;
+}
+
+/* Styles for the ThemeSwitcher component (if needed) */
+.theme-switcher {
+  display: inline-flex;
+  position: absolute;
+  top: 2%; /* Adjust the top distance as needed */
+  right: 5%;
+  /* right: 25px; Adjust the right distance as needed */
+}
+
+/* .theme-switcher button {
+  margin-right: 10px;
+} */
+
+.theme-button {
+  width: 40px; /* Set the desired button size */
+  height: 40px; /* Set the desired button size */
+  border-radius: 50%; /* Make the button circular */
+  background-color: #fff; /* Button background color */
+  border: 2px solid #333; /* Button border color */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px; /* Adjust the font size */
+}
+
+.display-linebreak {
+  white-space: pre-line;
+}

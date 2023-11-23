@@ -2,3 +2,6 @@ env/
 .prettierrc
 __pycache__/
 server/local_gpt_server/staticfiles/
+
+node_modules/
+chat-client/
