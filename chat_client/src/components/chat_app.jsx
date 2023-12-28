@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import ChatBox from "./chat_box";
 import MessageInput from "./message_input";
 import ThemeSwitcher from "./theme_switcher";
+import { DefineMessageType } from "../utils/MessageFormat";
 
 const GPT_NAME_TEMP = "LocalGPT_temp";
 const GPT_NAME = "LocalGPT";
@@ -26,7 +27,6 @@ function ChatApp() {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [theme, setTheme] = useState("light"); // Add theme state
-  const [initialFlag, setInitialFlag] = useState(true);
 
   useEffect(() => {
     async function fetchInitialChat() {
@@ -52,23 +52,15 @@ function ChatApp() {
         }
       } catch (error) {
         console.log(error);
-      } finally {
-        setInitialFlag(false);
       }
     }
-    if (initialFlag) {
-      console.log("fetchInitialChat");
-      fetchInitialChat();
-
-      return;
-    }
-  }, [initialFlag]);
+    fetchInitialChat();
+  }, []);
 
   const showInitialMessage = (message, sender) => {
     setMessages((prevMessages) => {
-      const newFragment = { type: "text", lang: "en", content: message };
-      const newMessage = { text: [newFragment], sender: sender };
-      // return [...prevMessages.slice(0, -1), newMessage];
+      const carifyMessageType = DefineMessageType(message);
+      const newMessage = { text: carifyMessageType, sender: sender };
       return [...prevMessages, newMessage];
     });
   };
@@ -82,49 +74,51 @@ function ChatApp() {
         let remainingText = message;
         const codeRegex = /```(.*?)```/s;
 
-        while (true) {
-          const codeMatch = remainingText.match(codeRegex);
-          if (!codeMatch) break;
+        const carifyMessageType = DefineMessageType(message);
 
-          const normalTextFragment = remainingText
-            .substring(0, codeMatch.index)
-            .trim();
-          const codeTextFragment = codeMatch[1].trim();
+        // while (true) {
+        //   const codeMatch = remainingText.match(codeRegex);
+        //   if (!codeMatch) break;
 
-          if (normalTextFragment) {
-            fragments.push({
-              type: "text",
-              lang: "en",
-              content: normalTextFragment,
-            });
-          }
-          if (codeTextFragment) {
-            const lines = codeTextFragment.split("\n");
-            const language = lines[0];
+        //   const normalTextFragment = remainingText
+        //     .substring(0, codeMatch.index)
+        //     .trim();
+        //   const codeTextFragment = codeMatch[1].trim();
 
-            lines.shift();
-            const remainingLines = lines.join("\n");
-            fragments.push({
-              type: "code",
-              lang: language,
-              content: remainingLines,
-            });
-          }
+        //   if (normalTextFragment) {
+        //     fragments.push({
+        //       type: "text",
+        //       lang: "en",
+        //       content: normalTextFragment,
+        //     });
+        //   }
+        //   if (codeTextFragment) {
+        //     const lines = codeTextFragment.split("\n");
+        //     const language = lines[0];
 
-          remainingText = remainingText.substring(
-            codeMatch.index + codeMatch[0].length
-          );
-        }
+        //     lines.shift();
+        //     const remainingLines = lines.join("\n");
+        //     fragments.push({
+        //       type: "code",
+        //       lang: language,
+        //       content: remainingLines,
+        //     });
+        //   }
 
-        if (remainingText.trim()) {
-          fragments.push({
-            type: "text",
-            lang: "en",
-            content: remainingText.trim(),
-          });
-        }
+        //   remainingText = remainingText.substring(
+        //     codeMatch.index + codeMatch[0].length
+        //   );
+        // }
 
-        const newMessage = { text: fragments, sender: sender };
+        // if (remainingText.trim()) {
+        //   fragments.push({
+        //     type: "text",
+        //     lang: "en",
+        //     content: remainingText.trim(),
+        //   });
+        // }
+
+        const newMessage = { text: carifyMessageType, sender: sender };
         return [...prevMessages.slice(0, -1), newMessage];
       } else {
         const lastMessage = prevMessages[prevMessages.length - 1];

@@ -51,7 +51,7 @@ function ChatBox({ messages, theme }) {
             ) : (
               <CodeSection
                 key={index}
-                showLineNumbers
+                showLineNumbers={true}
                 theme="dark"
                 lang={fragment.lang}
               >
