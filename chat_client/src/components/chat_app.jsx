@@ -1,8 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import ChatBox from "./chat_box";
 import MessageInput from "./message_input";
 import ThemeSwitcher from "./theme_switcher";
-
 
 const GPT_NAME_TEMP = "LocalGPT_temp";
 const GPT_NAME = "LocalGPT";
@@ -27,89 +26,146 @@ function ChatApp() {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [theme, setTheme] = useState("light"); // Add theme state
+  const [initialFlag, setInitialFlag] = useState(true);
+
+  useEffect(() => {
+    async function fetchInitialChat() {
+      try {
+        const response = await fetch("/api/initial_chat", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json, text/plain, */*",
+          },
+        });
+
+        const response_json = await response.json();
+
+        for (let i = 0; i < response_json["chat_history"].length; i++) {
+          const message = response_json["chat_history"][i];
+          let sender = USER_NAME;
+          if (message["role"] === "assistant") {
+            sender = GPT_NAME;
+          }
+
+          showInitialMessage(message["content"], sender);
+        }
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setInitialFlag(false);
+      }
+    }
+    if (initialFlag) {
+      console.log("fetchInitialChat");
+      fetchInitialChat();
+
+      return;
+    }
+  }, [initialFlag]);
+
+  const showInitialMessage = (message, sender) => {
+    setMessages((prevMessages) => {
+      const newFragment = { type: "text", lang: "en", content: message };
+      const newMessage = { text: [newFragment], sender: sender };
+      // return [...prevMessages.slice(0, -1), newMessage];
+      return [...prevMessages, newMessage];
+    });
+  };
 
   const showMessage = (message, sender) => {
     setMessages((prevMessages) => {
-      
       // For showing complete message with code section
       // After complete prepare complete message, the temp stream message will be deleted
       if (sender === GPT_NAME) {
         let fragments = [];
         let remainingText = message;
         const codeRegex = /```(.*?)```/s;
-    
-        while (true) { 
+
+        while (true) {
           const codeMatch = remainingText.match(codeRegex);
           if (!codeMatch) break;
-  
-          const normalTextFragment = remainingText.substring(0, codeMatch.index).trim();
+
+          const normalTextFragment = remainingText
+            .substring(0, codeMatch.index)
+            .trim();
           const codeTextFragment = codeMatch[1].trim();
-  
+
           if (normalTextFragment) {
-            fragments.push({ type: 'text', lang:'en', content: normalTextFragment });
+            fragments.push({
+              type: "text",
+              lang: "en",
+              content: normalTextFragment,
+            });
           }
           if (codeTextFragment) {
-            const lines = codeTextFragment.split('\n');
-            const language = lines[0]
+            const lines = codeTextFragment.split("\n");
+            const language = lines[0];
 
             lines.shift();
-            const remainingLines = lines.join('\n');
-            fragments.push({ type: 'code', lang:language, content: remainingLines });
+            const remainingLines = lines.join("\n");
+            fragments.push({
+              type: "code",
+              lang: language,
+              content: remainingLines,
+            });
           }
-  
-          remainingText = remainingText.substring(codeMatch.index + codeMatch[0].length);
+
+          remainingText = remainingText.substring(
+            codeMatch.index + codeMatch[0].length
+          );
         }
 
         if (remainingText.trim()) {
-            fragments.push({ type: 'text', lang:'en', content: remainingText.trim() });
+          fragments.push({
+            type: "text",
+            lang: "en",
+            content: remainingText.trim(),
+          });
         }
-        
+
         const newMessage = { text: fragments, sender: sender };
-        return [
-          ...prevMessages.slice(0, -1),
-          newMessage
-        ];
-
-
-      }
-      else {
+        return [...prevMessages.slice(0, -1), newMessage];
+      } else {
         const lastMessage = prevMessages[prevMessages.length - 1];
         // Deep clone of lastMessage to avoid modifying the original object directly
-        const clonedLastMessage = lastMessage ? JSON.parse(JSON.stringify(lastMessage)) : null;
+        const clonedLastMessage = lastMessage
+          ? JSON.parse(JSON.stringify(lastMessage))
+          : null;
 
         // For showing temp stream message, in case of there is word in the message
-        if (clonedLastMessage && clonedLastMessage.sender === sender && Array.isArray(clonedLastMessage.text) && clonedLastMessage.text.length > 0) {
-            let lastText = clonedLastMessage.text[clonedLastMessage.text.length - 1];
-            if (lastText && typeof lastText.content === 'string') {
-                lastText.content += message;
-                return [
-                    ...prevMessages.slice(0, -1),
-                    clonedLastMessage
-                ];
-            }
-        } 
-        else {
-            const newFragment = { type: 'text', lang: 'en', content: message };
-            // For showing temp stream message, in case of no word in the message
-            if (clonedLastMessage && clonedLastMessage.sender === sender) {
-                // If the last message exists and is from the same sender, add to its text array
-                clonedLastMessage.text.push(newFragment);
-                return prevMessages;
-            } else {
-                // Otherwise, create a new 
-                return [...prevMessages, { text: [newFragment], sender: sender }];
-            }
+        if (
+          clonedLastMessage &&
+          clonedLastMessage.sender === sender &&
+          Array.isArray(clonedLastMessage.text) &&
+          clonedLastMessage.text.length > 0
+        ) {
+          let lastText =
+            clonedLastMessage.text[clonedLastMessage.text.length - 1];
+          if (lastText && typeof lastText.content === "string") {
+            lastText.content += message;
+            return [...prevMessages.slice(0, -1), clonedLastMessage];
+          }
+        } else {
+          const newFragment = { type: "text", lang: "en", content: message };
+          // For showing temp stream message, in case of no word in the message
+          if (clonedLastMessage && clonedLastMessage.sender === sender) {
+            // If the last message exists and is from the same sender, add to its text array
+            clonedLastMessage.text.push(newFragment);
+            return prevMessages;
+          } else {
+            // Otherwise, create a new
+            return [...prevMessages, { text: [newFragment], sender: sender }];
+          }
         }
       }
-      
     });
   };
 
   const handleSend = async () => {
     // Set user message
     if (newMessage) {
-      
-      showMessage(newMessage, USER_NAME)
+      showMessage(newMessage, USER_NAME);
       // setMessages([...messages, { text: newMessage, sender: USER_NAME }]);
       setNewMessage("");
 
@@ -128,7 +184,7 @@ function ChatApp() {
         });
 
         const reader = response.body.getReader();
-        
+
         let text = "";
         let textAll = "";
         while (true) {

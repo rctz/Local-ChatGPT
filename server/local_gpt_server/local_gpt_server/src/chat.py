@@ -1,16 +1,24 @@
 import gpt4all
-from django.http import StreamingHttpResponse
+from django.http import StreamingHttpResponse, JsonResponse
 import json
 from django.views.decorators.csrf import csrf_exempt
 import copy
 from django.core.cache import cache
 from ..config import model_config
+from ..src import utils
 
 
 # model = GPT4All("wizardlm-13b-v1.1-superhot-8k.ggmlv3.q4_0.bin")
 model = gpt4all.GPT4All(model_name=model_config.MODEL_NAME)
 # model = GPT4All(model_name='orca-mini-13b.ggmlv3.q4_0.bin')
 
+def initial_chat(request):
+    session_id = request.session.session_key
+    chat_history = utils.get_chat_history(session_id)
+    if chat_history is None:
+        chat_history = [None]
+
+    return JsonResponse({"chat_history": chat_history[1:]})
 
 @csrf_exempt
 def chat_stream_response(request):

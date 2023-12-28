@@ -26,5 +26,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     
     path('api/chat_stream', chat.chat_stream_response, name='chat_stream_reponse'),
+    path('api/initial_chat', chat.initial_chat, name='initial_chat'),
 ] 
 urlpatterns += staticfiles_urlpatterns()
