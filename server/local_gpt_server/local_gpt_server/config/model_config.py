@@ -1,4 +1,5 @@
-MODEL_NAME = "orca-mini-3b.ggmlv3.q4_0.bin"
+MODEL_NAME = "gpt4all-falcon-q4_0.gguf"
+MODEL_PATH = "/Users/rctz/rctz/local_gpt/model"
 
 
 # Generate

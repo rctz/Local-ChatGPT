@@ -9,50 +9,58 @@ from ..src import utils
 
 
 # model = GPT4All("wizardlm-13b-v1.1-superhot-8k.ggmlv3.q4_0.bin")
-model = gpt4all.GPT4All(model_name=model_config.MODEL_NAME)
+model = gpt4all.GPT4All(model_name=model_config.MODEL_NAME, model_path=model_config.MODEL_PATH)
 # model = GPT4All(model_name='orca-mini-13b.ggmlv3.q4_0.bin')
 
 def initial_chat(request):
-    session_id = request.session.session_key
-    chat_history = utils.get_chat_history(session_id)
-    if chat_history is None:
-        chat_history = [None]
+    try:
+        session_id = request.session.session_key
+        chat_history = utils.get_chat_history(session_id)
+        if chat_history is None:
+            chat_history = [None]
 
-    return JsonResponse({"chat_history": chat_history[1:]})
+        return JsonResponse({"chat_history": chat_history[1:]})
+    except Exception as e:
+        print(e)
+        return JsonResponse({"error": "Something went wrong"}, status=400)
 
 @csrf_exempt
 def chat_stream_response(request):
-    session_id = request.session.session_key
-    chat_history = None
-    if session_id is None:
-        request.session.create()
+    try:
         session_id = request.session.session_key
-    else:
-        chat_history = cache.get(session_id)
+        chat_history = None
+        if session_id is None:
+            request.session.create()
+            session_id = request.session.session_key
+        else:
+            chat_history = cache.get(session_id)
 
-    if chat_history is None:
-        chat_history = [{"role": "system", "content": model.config["systemPrompt"]}]
+        if chat_history is None:
+            chat_history = [{"role": "system", "content": model.config["systemPrompt"]}]
 
-    def generate_response(prompt, chat_history, stream=False):
-        with model.chat_session() as session:
-            session.current_chat_session = copy.deepcopy(chat_history)
-            response = session.generate(
-                prompt=prompt,
-                max_tokens=model_config.MAX_TOKEN,
-                temp=model_config.TEMP,
-                streaming=stream,
-            )
-            for chunk in response:
-                # Yield the response chunk to stream to the client
-                yield chunk
+        def generate_response(prompt, chat_history, stream=False):
+            with model.chat_session() as session:
+                session.current_chat_session = copy.deepcopy(chat_history)
+                response = session.generate(
+                    prompt=prompt,
+                    max_tokens=model_config.MAX_TOKEN,
+                    temp=model_config.TEMP,
+                    streaming=stream,
+                )
+                for chunk in response:
+                    # Yield the response chunk to stream to the client
+                    yield chunk
 
-            # Expire in 15minutes
-            cache.set(session_id, copy.deepcopy(session.current_chat_session), 60 * 15)
+                # Expire in 15minutes
+                cache.set(session_id, copy.deepcopy(session.current_chat_session), 60 * 15)
 
-    message = json.loads(request.body)["message"]
-    response = StreamingHttpResponse(
-        generate_response(message, chat_history, stream=True),
-        content_type="application/octet-stream",
-    )
+        message = json.loads(request.body)["message"]
+        response = StreamingHttpResponse(
+            generate_response(message, chat_history, stream=True),
+            content_type="application/octet-stream",
+        )
+    except Exception as e:
+        print(e)
+        response = JsonResponse({"error": "Something went wrong"}, status=400)
 
     return response
