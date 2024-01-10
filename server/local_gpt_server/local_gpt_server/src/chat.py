@@ -5,12 +5,16 @@ from django.views.decorators.csrf import csrf_exempt
 import copy
 from django.core.cache import cache
 from ..config import model_config
+from ..config import server_config
 from ..src import utils
 
 
 # model = GPT4All("wizardlm-13b-v1.1-superhot-8k.ggmlv3.q4_0.bin")
-model = gpt4all.GPT4All(model_name=model_config.MODEL_NAME, model_path=model_config.MODEL_PATH)
+model = gpt4all.GPT4All(
+    model_name=model_config.MODEL_NAME, model_path=model_config.MODEL_PATH
+)
 # model = GPT4All(model_name='orca-mini-13b.ggmlv3.q4_0.bin')
+
 
 def initial_chat(request):
     try:
@@ -23,6 +27,7 @@ def initial_chat(request):
     except Exception as e:
         print(e)
         return JsonResponse({"error": "Something went wrong"}, status=400)
+
 
 @csrf_exempt
 def chat_stream_response(request):
@@ -52,7 +57,11 @@ def chat_stream_response(request):
                     yield chunk
 
                 # Expire in 15minutes
-                cache.set(session_id, copy.deepcopy(session.current_chat_session), 60 * 15)
+                cache.set(
+                    session_id,
+                    copy.deepcopy(session.current_chat_session),
+                    60 * server_config.SESSION_KEEP_TIME,
+                )
 
         message = json.loads(request.body)["message"]
         response = StreamingHttpResponse(

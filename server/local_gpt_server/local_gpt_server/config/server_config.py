@@ -1,0 +1,1 @@
+SESSION_KEEP_TIME = 60  # Minutes
