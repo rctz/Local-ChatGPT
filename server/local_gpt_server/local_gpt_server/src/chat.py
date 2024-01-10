@@ -34,6 +34,7 @@ def chat_stream_response(request):
     try:
         session_id = request.session.session_key
         chat_history = None
+        system_prompt = model.config["systemPrompt"]
         if session_id is None:
             request.session.create()
             session_id = request.session.session_key
@@ -41,7 +42,9 @@ def chat_stream_response(request):
             chat_history = cache.get(session_id)
 
         if chat_history is None:
-            chat_history = [{"role": "system", "content": model.config["systemPrompt"]}]
+            if model_config.MODEL_SYSTEM_PROMPT != "":
+                system_prompt = model_config.MODEL_SYSTEM_PROMPT
+            chat_history = [{"role": "system", "content": system_prompt}]
 
         def generate_response(prompt, chat_history, stream=False):
             with model.chat_session() as session:
