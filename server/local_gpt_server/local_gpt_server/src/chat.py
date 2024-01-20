@@ -8,12 +8,9 @@ from ..config import model_config
 from ..config import server_config
 from ..src import utils
 
-
-# model = GPT4All("wizardlm-13b-v1.1-superhot-8k.ggmlv3.q4_0.bin")
 model = gpt4all.GPT4All(
-    model_name=model_config.MODEL_NAME, model_path=model_config.MODEL_PATH
+    model_name=model_config.MODEL_NAME, model_path=model_config.MODEL_PATH, verbose=True
 )
-# model = GPT4All(model_name='orca-mini-13b.ggmlv3.q4_0.bin')
 
 
 def initial_chat(request):
