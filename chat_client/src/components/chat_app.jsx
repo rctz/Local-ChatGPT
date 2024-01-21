@@ -70,53 +70,7 @@ function ChatApp() {
       // For showing complete message with code section
       // After complete prepare complete message, the temp stream message will be deleted
       if (sender === GPT_NAME) {
-        let fragments = [];
-        let remainingText = message;
-        const codeRegex = /```(.*?)```/s;
-
         const carifyMessageType = DefineMessageType(message);
-
-        // while (true) {
-        //   const codeMatch = remainingText.match(codeRegex);
-        //   if (!codeMatch) break;
-
-        //   const normalTextFragment = remainingText
-        //     .substring(0, codeMatch.index)
-        //     .trim();
-        //   const codeTextFragment = codeMatch[1].trim();
-
-        //   if (normalTextFragment) {
-        //     fragments.push({
-        //       type: "text",
-        //       lang: "en",
-        //       content: normalTextFragment,
-        //     });
-        //   }
-        //   if (codeTextFragment) {
-        //     const lines = codeTextFragment.split("\n");
-        //     const language = lines[0];
-
-        //     lines.shift();
-        //     const remainingLines = lines.join("\n");
-        //     fragments.push({
-        //       type: "code",
-        //       lang: language,
-        //       content: remainingLines,
-        //     });
-        //   }
-
-        //   remainingText = remainingText.substring(
-        //     codeMatch.index + codeMatch[0].length
-        //   );
-        // }
-
-        // if (remainingText.trim()) {
-        //   fragments.push({
-        //     type: "text",
-        //     lang: "en",
-        //     content: remainingText.trim(),
-        //   });
-        // }
 
         const newMessage = { text: carifyMessageType, sender: sender };
         return [...prevMessages.slice(0, -1), newMessage];
@@ -177,21 +131,27 @@ function ChatApp() {
           }),
         });
 
-        const reader = response.body.getReader();
+        console.log(response);
 
-        let text = "";
-        let textAll = "";
-        while (true) {
-          const { done, value } = await reader.read();
-          text = new TextDecoder().decode(value);
-          textAll = textAll + text;
-          if (done) {
-            // For showing complete message with code section
-            showMessage(textAll, GPT_NAME);
-            break;
+        if (response.ok) {
+          const reader = response.body.getReader();
+
+          let text = "";
+          let textAll = "";
+          while (true) {
+            const { done, value } = await reader.read();
+            text = new TextDecoder().decode(value);
+            textAll = textAll + text;
+            if (done) {
+              // For showing complete message with code section
+              showMessage(textAll, GPT_NAME);
+              break;
+            }
+            // For showing temp stream message
+            showMessage(text, GPT_NAME_TEMP);
           }
-          // For showing temp stream message
-          showMessage(text, GPT_NAME_TEMP);
+        } else {
+          showMessage("asddasd", GPT_NAME_TEMP);
         }
       } catch (error) {
         console.log(error);
