@@ -7,10 +7,16 @@ from django.core.cache import cache
 from ..config import model_config
 from ..config import server_config
 from ..src import utils
+import redis
 
 model = gpt4all.GPT4All(
-    model_name=model_config.MODEL_NAME, model_path=model_config.MODEL_PATH, verbose=True
+    model_name=model_config.MODEL_NAME,
+    model_path=model_config.MODEL_PATH,
+    verbose=True,
+    n_threads=2,
 )
+
+# redis_client = redis.Redis(host="localhost", port=6379, db=0)
 
 
 def initial_chat(request):
