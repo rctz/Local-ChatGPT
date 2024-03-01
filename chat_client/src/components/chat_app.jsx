@@ -7,6 +7,7 @@ import { DefineMessageType } from "../utils/MessageFormat";
 const GPT_NAME_TEMP = "LocalGPT_temp";
 const GPT_NAME = "LocalGPT";
 const USER_NAME = "User";
+const BACKEND_API = "http://192.168.1.47:8000"; 
 
 function getCookie(name) {
   let cookieValue = null;
@@ -31,7 +32,8 @@ function ChatApp() {
   useEffect(() => {
     async function fetchInitialChat() {
       try {
-        const response = await fetch("/api/initial_chat", {
+        // const response = await fetch("/api/initial_chat", {
+        const response = await fetch(`${BACKEND_API}/api/initial_chat`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -115,11 +117,13 @@ function ChatApp() {
     if (newMessage) {
       showMessage(newMessage, USER_NAME);
       // setMessages([...messages, { text: newMessage, sender: USER_NAME }]);
-      setNewMessage("");
+      
 
       const csrfToken = getCookie("csrftoken");
       try {
-        const response = await fetch("/api/chat_stream", {
+        // const response = await fetch("/api/chat_stream", {
+        // console.log(newMessage);
+        const response = await fetch(`${BACKEND_API}/api/chat_stream`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -130,7 +134,7 @@ function ChatApp() {
             message: newMessage,
           }),
         });
-
+        setNewMessage("");
         console.log(response);
 
         if (response.ok) {
@@ -142,6 +146,7 @@ function ChatApp() {
             const { done, value } = await reader.read();
             text = new TextDecoder().decode(value);
             textAll = textAll + text;
+            // console.log(textAll);
             if (done) {
               // For showing complete message with code section
               showMessage(textAll, GPT_NAME);

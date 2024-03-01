@@ -58,6 +58,7 @@ def chat_stream_response(request):
                     temp=model_config.TEMP,
                     streaming=stream,
                 )
+                # print("Hello", model.current_chat_session)
                 for chunk in response:
                     # Yield the response chunk to stream to the client
                     yield chunk
@@ -70,6 +71,7 @@ def chat_stream_response(request):
                 )
 
         message = json.loads(request.body)["message"]
+        # print(type(generate_response(message, chat_history, stream=True)))
         response = StreamingHttpResponse(
             generate_response(message, chat_history, stream=True),
             content_type="application/octet-stream",
@@ -77,5 +79,5 @@ def chat_stream_response(request):
     except Exception as e:
         print(e)
         response = JsonResponse({"error": "Something went wrong"}, status=400)
-
+    pass
     return response

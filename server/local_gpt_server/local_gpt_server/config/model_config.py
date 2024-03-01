@@ -1,5 +1,5 @@
 MODEL_NAME = "all-MiniLM-L6-v2-f16.gguf"
-MODEL_PATH = "D:\Local-ChatGPT\model"
+MODEL_PATH = "/home/pharkphoom/Documents/LocalChat/model"
 MODEL_SYSTEM_PROMPT = "You are an AI code generation assistant. You can answer questions about code, generate code, and translate code with the best quality and performance."
 
 
