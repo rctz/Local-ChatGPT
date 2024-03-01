@@ -4,16 +4,17 @@ import json
 from django.views.decorators.csrf import csrf_exempt
 import copy
 from django.core.cache import cache
-from ..config import model_config
-from ..config import server_config
+from ..config.model_config import ModelConfig
+from ..config.server_config import ServerConfig
 from ..src import utils
 import redis
 
 model = gpt4all.GPT4All(
-    model_name=model_config.MODEL_NAME,
-    model_path=model_config.MODEL_PATH,
-    verbose=True,
-    n_threads=2,
+    model_name=ModelConfig.MODEL_NAME,
+    model_path=ModelConfig.MODEL_PATH,
+    verbose=ModelConfig.DEBUG,
+    n_threads=ModelConfig.N_THREADS,
+    device=ModelConfig.DEVICE_MODE,
 )
 
 # redis_client = redis.Redis(host="localhost", port=6379, db=0)
@@ -45,8 +46,8 @@ def chat_stream_response(request):
             chat_history = cache.get(session_id)
 
         if chat_history is None:
-            if model_config.MODEL_SYSTEM_PROMPT != "":
-                system_prompt = model_config.MODEL_SYSTEM_PROMPT
+            if ModelConfig.MODEL_SYSTEM_PROMPT != "":
+                system_prompt = ModelConfig.MODEL_SYSTEM_PROMPT
             chat_history = [{"role": "system", "content": system_prompt}]
 
         def generate_response(prompt, chat_history, stream=False):
@@ -54,8 +55,8 @@ def chat_stream_response(request):
                 session.current_chat_session = copy.deepcopy(chat_history)
                 response = session.generate(
                     prompt=prompt,
-                    max_tokens=model_config.MAX_TOKEN,
-                    temp=model_config.TEMP,
+                    max_tokens=ModelConfig.MAX_TOKEN,
+                    temp=ModelConfig.TEMP,
                     streaming=stream,
                 )
                 # print("Hello", model.current_chat_session)
@@ -67,7 +68,7 @@ def chat_stream_response(request):
                 cache.set(
                     session_id,
                     copy.deepcopy(session.current_chat_session),
-                    60 * server_config.SESSION_KEEP_TIME,
+                    ServerConfig.build_session_time(),
                 )
 
         message = json.loads(request.body)["message"]

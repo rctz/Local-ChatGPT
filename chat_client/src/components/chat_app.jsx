@@ -3,11 +3,10 @@ import ChatBox from "./chat_box";
 import MessageInput from "./message_input";
 import ThemeSwitcher from "./theme_switcher";
 import { DefineMessageType } from "../utils/MessageFormat";
+import CLIENT_CONFIG from "../config/client_config";
 
-const GPT_NAME_TEMP = "LocalGPT_temp";
-const GPT_NAME = "LocalGPT";
-const USER_NAME = "User";
-const BACKEND_API = "http://192.168.1.47:8000"; 
+const BACKEND_API =
+  "http://" + CLIENT_CONFIG.SERVER.IP + ":" + CLIENT_CONFIG.SERVER.PORT;
 
 function getCookie(name) {
   let cookieValue = null;
@@ -45,9 +44,9 @@ function ChatApp() {
 
         for (let i = 0; i < response_json["chat_history"].length; i++) {
           const message = response_json["chat_history"][i];
-          let sender = USER_NAME;
+          let sender = CLIENT_CONFIG.CHAT.USER_NAME;
           if (message["role"] === "assistant") {
-            sender = GPT_NAME;
+            sender = CLIENT_CONFIG.CHAT.GPT_NAME;
           }
 
           showInitialMessage(message["content"], sender);
@@ -71,7 +70,7 @@ function ChatApp() {
     setMessages((prevMessages) => {
       // For showing complete message with code section
       // After complete prepare complete message, the temp stream message will be deleted
-      if (sender === GPT_NAME) {
+      if (sender === CLIENT_CONFIG.CHAT.GPT_NAME) {
         const carifyMessageType = DefineMessageType(message);
 
         const newMessage = { text: carifyMessageType, sender: sender };
@@ -115,9 +114,8 @@ function ChatApp() {
   const handleSend = async () => {
     // Set user message
     if (newMessage) {
-      showMessage(newMessage, USER_NAME);
+      showMessage(newMessage, CLIENT_CONFIG.CHAT.USER_NAME);
       // setMessages([...messages, { text: newMessage, sender: USER_NAME }]);
-      
 
       const csrfToken = getCookie("csrftoken");
       try {
@@ -149,14 +147,14 @@ function ChatApp() {
             // console.log(textAll);
             if (done) {
               // For showing complete message with code section
-              showMessage(textAll, GPT_NAME);
+              showMessage(textAll, CLIENT_CONFIG.CHAT.GPT_NAME);
               break;
             }
             // For showing temp stream message
-            showMessage(text, GPT_NAME_TEMP);
+            showMessage(text, CLIENT_CONFIG.CHAT.GPT_NAME_TEMP);
           }
         } else {
-          showMessage("asddasd", GPT_NAME_TEMP);
+          showMessage("asddasd", CLIENT_CONFIG.CHAT.GPT_NAME_TEMP);
         }
       } catch (error) {
         console.log(error);
