@@ -41,8 +41,7 @@ function ChatApp() {
 
         const response_json = await response.json();
 
-        for (let i = 0; i < response_json["chat_history"].length; i++) {
-          const message = response_json["chat_history"][i];
+        for (let message of response_json["chat_history"]) {
           let sender = USER_NAME;
           if (message["role"] === "assistant") {
             sender = GPT_NAME;
