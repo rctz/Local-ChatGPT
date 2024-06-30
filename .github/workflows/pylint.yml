@@ -23,4 +23,10 @@ jobs:
       run: |
         pylint $(git ls-files '*.py') > pylint-output.txt || echo "Pylint failed with error code $?"
       continue-on-error: true
+    - name: Save Pylint output as artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: pylint-output  # Artifact name
+        path: pylint-output.txt  # Path to the file you want to upload
+
 
