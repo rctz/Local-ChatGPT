@@ -42,13 +42,13 @@ jobs:
       - name: Extract Pylint score
         id: extract-pylint-score
         run: |
-          pylint_score=$(cat pylint-output.txt | grep -oP '(?<=Your\scode\shas\sgotten\s)[0-9]+(?:\.[0-9]*)?')
+          pylint_score=$(sed -nE 's/Your code has been rated at ([0-9]+\.[0-9]*)\/10/\1/p' pylint-output.txt)
           echo "::set-output name=pylint_score::$pylint_score"
 
       - name: Post comment in PR with Pylint score and artifact link
         if: success()
         run: |
-          pylint_score=$(cat pylint-output.txt | grep -oP '(?<=Your\scode\shas\sgotten\s)[0-9]+(?:\.[0-9]*)?')
+          pylint_score=$(sed -nE 's/Your code has been rated at ([0-9]+\.[0-9]*)\/10/\1/p' pylint-output.txt)
           artifact_url="https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/artifacts/download"
           comment="Pylint score for this PR: ${pylint_score}\nArtifact: [Download pylint-output.txt](${artifact_url})"
           echo "$comment"
