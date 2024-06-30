@@ -12,7 +12,7 @@ jobs:
         python-version: ["3.11"]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v2
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
@@ -44,16 +44,9 @@ jobs:
 
       - name: Post comment in PR with Pylint score and artifact link
         if: success()
-        uses: actions/github-script@v5
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const { context, GitHub } = require('@actions/github');
-            const github = new GitHub(process.env.GITHUB_TOKEN);
-            const comment = `Pylint score for this PR: ${process.env.pylint_score}\nArtifact: [Download pylint-output.txt](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${{ github.run_id }}/artifacts/download)`;
-            github.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-              body: comment
-            });
+        run: |
+          pylint_score=$(cat pylint-output.txt | grep -oP '(?<=Your\scode\shas\sgotten\s)[0-9]+(?:\.[0-9]*)?')
+          artifact_url="https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/artifacts/download"
+          comment="Pylint score for this PR: ${pylint_score}\nArtifact: [Download pylint-output.txt](${artifact_url})"
+          echo "$comment"
+          curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -H "Content-Type: application/json" -d "{\"body\": \"$comment\"}" "https://api.github.com/repos/${GITHUB_REPOSITORY}/issues/${{ github.event.number }}/comments"
