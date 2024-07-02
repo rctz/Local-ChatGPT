@@ -12,6 +12,14 @@ model = gpt4all.GPT4All(
     model_name=model_config.MODEL_NAME, model_path=model_config.MODEL_PATH, verbose=True
 )
 
+def test_sonar(request):
+    tmp_list = [1,2,3]
+    # Wrong index will be error
+    tmp_list_idx = tmp_list[3]
+    if (tmp_list_idx):
+        pass
+    else:
+        pass
 
 def initial_chat(request):
     try:
