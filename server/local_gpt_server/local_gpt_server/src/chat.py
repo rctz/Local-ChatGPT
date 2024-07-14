@@ -1,5 +1,5 @@
 import gpt4all
-from django.http import StreamingHttpResponse, JsonResponse
+from django.http import StreamingHttpResponse, JsonResponse, HttpResponse
 import json
 from django.views.decorators.csrf import csrf_exempt
 import copy
@@ -7,28 +7,19 @@ from django.core.cache import cache
 from ..config import model_config
 from ..config import server_config
 from ..src import utils
+from .module import azure_test
 
-model = gpt4all.GPT4All(
-    model_name=model_config.MODEL_NAME, model_path=model_config.MODEL_PATH, verbose=True
-)
-
-def test_sonar(request):
-    tmp_list = [1,2,3]
-    # Wrong index will be error
-    tmp_list_idx = tmp_list[3]
-    if (tmp_list_idx):
-        pass
-    else:
-        pass
 
 def initial_chat(request):
     try:
         session_id = request.session.session_key
         chat_history = utils.get_chat_history(session_id)
         if chat_history is None:
-            chat_history = [None]
+            return JsonResponse({"chat_history": []})
 
-        return JsonResponse({"chat_history": chat_history[1:]})
+        return JsonResponse(
+            {"chat_history": chat_history["input_data"]["input_string"]}
+        )
     except Exception as e:
         print(e)
         return JsonResponse({"error": "Something went wrong"}, status=400)
@@ -39,43 +30,25 @@ def chat_stream_response(request):
     try:
         session_id = request.session.session_key
         chat_history = None
-        system_prompt = model.config["systemPrompt"]
         if session_id is None:
             request.session.create()
             session_id = request.session.session_key
         else:
             chat_history = cache.get(session_id)
 
-        if chat_history is None:
-            if model_config.MODEL_SYSTEM_PROMPT != "":
-                system_prompt = model_config.MODEL_SYSTEM_PROMPT
-            chat_history = [{"role": "system", "content": system_prompt}]
-
-        def generate_response(prompt, chat_history, stream=False):
-            with model.chat_session() as session:
-                session.current_chat_session = copy.deepcopy(chat_history)
-                response = session.generate(
-                    prompt=prompt,
-                    max_tokens=model_config.MAX_TOKEN,
-                    temp=model_config.TEMP,
-                    streaming=stream,
-                )
-                for chunk in response:
-                    # Yield the response chunk to stream to the client
-                    yield chunk
-
-                # Expire in 15minutes
-                cache.set(
-                    session_id,
-                    copy.deepcopy(session.current_chat_session),
-                    60 * server_config.SESSION_KEEP_TIME,
-                )
-
         message = json.loads(request.body)["message"]
-        response = StreamingHttpResponse(
-            generate_response(message, chat_history, stream=True),
-            content_type="application/octet-stream",
+        result, normalize_json = azure_test.invoke_azure_endpoint_sync(
+            {
+                "role": "user",
+                "content": message,
+            },
+            chat_history,
         )
+
+        ## Save chat history to cache
+        cache.set(session_id, normalize_json, timeout=server_config.SESSION_KEEP_TIME)
+        response = HttpResponse(result["output"])
+
     except Exception as e:
         print(e)
         response = JsonResponse({"error": "Something went wrong"}, status=400)

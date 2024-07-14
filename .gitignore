@@ -5,3 +5,4 @@ server/local_gpt_server/staticfiles/
 
 node_modules/
 chat-client/
+.env
