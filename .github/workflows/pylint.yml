@@ -1,0 +1,57 @@
+name: Pylint
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    branches:
+      - develop
+  push:
+    branches:
+      - develop
+
+jobs:
+  pylint:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11"]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pylint
+          pip install -r requirements.txt
+
+      - name: Analyze code with pylint
+        run: |
+          pylint $(git ls-files '*.py') > pylint-output.txt || echo "Pylint failed with error code $?"
+        continue-on-error: true
+
+      - name: Save Pylint output as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: pylint-output
+          path: pylint-output.txt
+
+      - name: Extract Pylint score
+        id: extract-pylint-score
+        run: |
+          pylint_score=$(sed -nE 's/Your code has been rated at ([0-9]+\.[0-9]*)\/10/\1/p' pylint-output.txt)
+          echo "::set-output name=pylint_score::$pylint_score"
+
+      - name: Post comment in PR with Pylint score and artifact link
+        if: success()
+        run: |
+          pylint_score=$(sed -nE 's/Your code has been rated at ([0-9]+\.[0-9]*)\/10/\1/p' pylint-output.txt)
+          artifact_url="https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/artifacts/download"
+          comment="Pylint score for this PR: ${pylint_score}\nArtifact: [Download pylint-output.txt](${artifact_url})"
+          echo "$comment"
+          curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -H "Content-Type: application/json" -d "{\"body\": \"$comment\"}" "https://api.github.com/repos/${GITHUB_REPOSITORY}/issues/${{ github.event.number }}/comments"
