@@ -18,7 +18,7 @@ Local chat bot base on pre-trained models for using with local confidential data
    ```
 3. install required python packages
    ```bash
-   pip install -r requirement.txt
+   pip install -r requirements.txt
    ```
 4. Change directory to server
    ```bash
