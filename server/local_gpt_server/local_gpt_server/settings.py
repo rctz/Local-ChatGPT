@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "corsheaders",
     "local_gpt_server",
+    "generative_ai",
+    "message_channel",
 ]
 
 MIDDLEWARE = [
